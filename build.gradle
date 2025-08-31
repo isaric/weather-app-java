@@ -20,6 +20,8 @@ dependencies {
 
     // LangChain4j core - used for PromptTemplate (no external API key required)
     implementation 'dev.langchain4j:langchain4j:0.35.0'
+    // LangChain4j Google Gemini (direct Gemini API via Google AI Studio)
+    implementation 'dev.langchain4j:langchain4j-google-ai-gemini:0.35.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

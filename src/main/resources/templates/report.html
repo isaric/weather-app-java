@@ -83,8 +83,22 @@
       color: #b00020;
       font-weight: 600;
     }
+
+    .map-container {
+      width: 100%;
+      height: 340px;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+    }
   </style>
   <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
 
 <body>
@@ -97,10 +111,18 @@
     </h1>
     <p class="muted">Timezone: <span id="timezone">auto</span></p>
 
+    <!-- Map container -->
+    <div id="map" class="map-container"></div>
+
     <div th:if="${error}" id="server-error" class="error" th:text="${error}">An error occurred</div>
     <div id="client-error" class="error" style="display:none"></div>
 
     <div id="loading" class="muted">Loading weather data…</div>
+
+    <div id="aiSummary" class="card" style="margin-top: 1rem;">
+      <h2 style="margin-top:0; font-size: 1.2rem;">AI summary & activity suggestions</h2>
+      <div id="aiSummaryContent" class="muted">Generating AI summary…</div>
+    </div>
 
     <div id="charts" class="charts" style="display:none">
       <div id="tempChart" class="chart"></div>
@@ -108,6 +130,8 @@
       <div id="windChart" class="chart"></div>
       <div id="humidityChart" class="chart"></div>
     </div>
+
+    <script id="report-json" type="application/json" th:utext="${reportJson}">{}</script>
 
     <script>
       // Load Google Charts
@@ -130,7 +154,17 @@
           showClientError('Invalid coordinates.');
           return;
         }
+        initMap(lat, lon); // <-- Add this line to initialize the map
         fetchAndDraw(lat, lon);
+      }
+
+      // Initialize Leaflet map
+      function initMap(lat, lon) {
+        const map = L.map('map').setView([lat, lon], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        L.marker([lat, lon]).addTo(map);
       }
 
       async function fetchAndDraw(lat, lon) {
@@ -150,6 +184,7 @@
           const resp = await fetch(url.toString());
           if (!resp.ok) throw new Error('Weather API request failed');
           const data = await resp.json();
+          fetchAiSummary(data)
           const hourly = data.hourly || {};
           // Update timezone display
           const tz = data.timezone || 'auto';
@@ -254,6 +289,37 @@
         };
         const chart = new google.visualization.ColumnChart(document.getElementById(elementId));
         chart.draw(data, options);
+      }
+
+      async function fetchAiSummary(report) {
+        const target = document.getElementById('aiSummaryContent');
+        if (!report || !target) return;
+        try {
+          const params = new URLSearchParams();
+          const tz = document.getElementById('tz')?.textContent || undefined;
+          const city = document.getElementById('cityName')?.textContent || undefined;
+          if (tz) params.set('timezone', tz);
+          if (city) params.set('city', city);
+
+          const resp = await fetch('/api/ai-summary' + (params.toString() ? ('?' + params.toString()) : ''), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(report)
+          });
+          const data = await resp.json();
+          if (!resp.ok) {
+            target.textContent = data?.summary || 'AI summary failed.';
+            target.classList.remove('muted');
+            return;
+          }
+          const summary = data?.summary || 'No AI summary available.';
+          // Render markdown using marked.js
+          target.innerHTML = marked.parse(summary);
+          target.classList.remove('muted');
+        } catch (err) {
+          target.textContent = 'AI summary unavailable.';
+          target.classList.remove('muted');
+        }
       }
 
       // Redraw charts on window resize

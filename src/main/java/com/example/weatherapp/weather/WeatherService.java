@@ -32,15 +32,15 @@ public class WeatherService {
                         "temperature_2m",
                         "precipitation",
                         "wind_speed_10m",
-                        "relative_humidity_2m"
-                ))
+                        "relative_humidity_2m"))
                 .queryParam("forecast_days", 3)
                 .queryParam("timezone", "auto")
                 .toUriString();
 
         ResponseEntity<Map> resp = restTemplate.getForEntity(url, Map.class);
         Map body = resp.getBody();
-        if (body == null) throw new IllegalStateException("Empty response from weather API");
+        if (body == null)
+            throw new IllegalStateException("Empty response from weather API");
 
         // Map response into our DTO
         WeatherReport report = new WeatherReport();
@@ -52,11 +52,13 @@ public class WeatherService {
         if (!(hourlyObj instanceof Map<?, ?> hourly)) {
             throw new IllegalStateException("Unexpected response: missing hourly");
         }
-        report.setTimes(asStringList(hourly.get("time")));
-        report.setTemperature2m(asDoubleList(hourly.get("temperature_2m")));
-        report.setPrecipitation(asDoubleList(hourly.get("precipitation")));
-        report.setWindSpeed10m(asDoubleList(hourly.get("wind_speed_10m")));
-        report.setRelativeHumidity2m(asDoubleList(hourly.get("relative_humidity_2m")));
+        WeatherReport.Hourly hourlyData = new WeatherReport.Hourly();
+        hourlyData.setTime(asStringList(hourly.get("time")));
+        hourlyData.setTemperature2m(asDoubleList(hourly.get("temperature_2m")));
+        hourlyData.setPrecipitation(asDoubleList(hourly.get("precipitation")));
+        hourlyData.setWindSpeed10m(asDoubleList(hourly.get("wind_speed_10m")));
+        hourlyData.setRelativeHumidity2m(asDoubleList(hourly.get("relative_humidity_2m")));
+        report.setHourly(hourlyData);
 
         return report;
     }
@@ -72,14 +74,21 @@ public class WeatherService {
 
     @SuppressWarnings("unchecked")
     private static List<Double> asDoubleList(Object o) {
-        if (o == null) return null;
+        if (o == null)
+            return null;
         return ((List<?>) o).stream().map(WeatherService::asDouble).toList();
     }
 
     private static Double asDouble(Object o) {
-        if (o == null) return null;
-        if (o instanceof Number n) return n.doubleValue();
-        try { return Double.parseDouble(String.valueOf(o)); } catch (Exception e) { return null; }
+        if (o == null)
+            return null;
+        if (o instanceof Number n)
+            return n.doubleValue();
+        try {
+            return Double.parseDouble(String.valueOf(o));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -87,30 +96,91 @@ public class WeatherService {
         private Double latitude;
         private Double longitude;
         private String timezone;
-        private List<String> times;
-        @JsonProperty("temperature_2m")
-        private List<Double> temperature2m;
-        private List<Double> precipitation;
-        @JsonProperty("wind_speed_10m")
-        private List<Double> windSpeed10m;
-        @JsonProperty("relative_humidity_2m")
-        private List<Double> relativeHumidity2m;
+        private Hourly hourly;
 
-        public Double getLatitude() { return latitude; }
-        public void setLatitude(Double latitude) { this.latitude = latitude; }
-        public Double getLongitude() { return longitude; }
-        public void setLongitude(Double longitude) { this.longitude = longitude; }
-        public String getTimezone() { return timezone; }
-        public void setTimezone(String timezone) { this.timezone = timezone; }
-        public List<String> getTimes() { return times; }
-        public void setTimes(List<String> times) { this.times = times; }
-        public List<Double> getTemperature2m() { return temperature2m; }
-        public void setTemperature2m(List<Double> temperature2m) { this.temperature2m = temperature2m; }
-        public List<Double> getPrecipitation() { return precipitation; }
-        public void setPrecipitation(List<Double> precipitation) { this.precipitation = precipitation; }
-        public List<Double> getWindSpeed10m() { return windSpeed10m; }
-        public void setWindSpeed10m(List<Double> windSpeed10m) { this.windSpeed10m = windSpeed10m; }
-        public List<Double> getRelativeHumidity2m() { return relativeHumidity2m; }
-        public void setRelativeHumidity2m(List<Double> relativeHumidity2m) { this.relativeHumidity2m = relativeHumidity2m; }
+        public Double getLatitude() {
+            return latitude;
+        }
+
+        public void setLatitude(Double latitude) {
+            this.latitude = latitude;
+        }
+
+        public Double getLongitude() {
+            return longitude;
+        }
+
+        public void setLongitude(Double longitude) {
+            this.longitude = longitude;
+        }
+
+        public String getTimezone() {
+            return timezone;
+        }
+
+        public void setTimezone(String timezone) {
+            this.timezone = timezone;
+        }
+
+        public Hourly getHourly() {
+            return hourly;
+        }
+
+        public void setHourly(Hourly hourly) {
+            this.hourly = hourly;
+        }
+
+        // Nested class to match the "hourly" object structure
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class Hourly {
+            private List<String> time;
+            @JsonProperty("temperature_2m")
+            private List<Double> temperature2m;
+            private List<Double> precipitation;
+            @JsonProperty("wind_speed_10m")
+            private List<Double> windSpeed10m;
+            @JsonProperty("relative_humidity_2m")
+            private List<Double> relativeHumidity2m;
+
+            public List<String> getTime() {
+                return time;
+            }
+
+            public void setTime(List<String> time) {
+                this.time = time;
+            }
+
+            public List<Double> getTemperature2m() {
+                return temperature2m;
+            }
+
+            public void setTemperature2m(List<Double> temperature2m) {
+                this.temperature2m = temperature2m;
+            }
+
+            public List<Double> getPrecipitation() {
+                return precipitation;
+            }
+
+            public void setPrecipitation(List<Double> precipitation) {
+                this.precipitation = precipitation;
+            }
+
+            public List<Double> getWindSpeed10m() {
+                return windSpeed10m;
+            }
+
+            public void setWindSpeed10m(List<Double> windSpeed10m) {
+                this.windSpeed10m = windSpeed10m;
+            }
+
+            public List<Double> getRelativeHumidity2m() {
+                return relativeHumidity2m;
+            }
+
+            public void setRelativeHumidity2m(List<Double> relativeHumidity2m) {
+                this.relativeHumidity2m = relativeHumidity2m;
+            }
+        }
     }
 }

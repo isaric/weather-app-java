@@ -110,8 +110,12 @@
     <hr />
     <form id="location-form" class="form-row" method="get" action="/report">
       <label for="city-input">Your town/city</label>
-      <input id="city-input" name="city" type="text" list="city-suggestions" placeholder="Start typing your town..."
-        autocomplete="off" />
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <input id="city-input" name="city" type="text" list="city-suggestions" placeholder="Start typing your town..."
+          autocomplete="off" style="flex: 1 1 auto;" />
+        <button type="button" id="geo-btn" title="Use my location" style="white-space: nowrap;">Use my location</button>
+        <button type="button" id="reset-btn" style="display:none;">Reset</button>
+      </div>
       <input type="hidden" id="lat" name="lat" />
       <input type="hidden" id="lon" name="lon" />
       <datalist id="city-suggestions"></datalist>
@@ -126,6 +130,11 @@
       const input = document.getElementById('city-input');
       const datalist = document.getElementById('city-suggestions');
       const form = document.getElementById('location-form');
+      const geoBtn = document.getElementById('geo-btn');
+      const resetBtn = document.getElementById('reset-btn');
+      const latEl = document.getElementById('lat');
+      const lonEl = document.getElementById('lon');
+      const submitBtn = document.getElementById('submit-btn');
 
       // Validate before submission: ensure we have parsed coordinates
       form.addEventListener('submit', function (e) {
@@ -142,6 +151,8 @@
         // Extract up to first comma, or first word if no comma
         let cityFirstWord = cityVal.split(',')[0].trim().split(/\s+/)[0];
         input.value = cityFirstWord;
+        // Ensure city input is enabled so it is included in the form submission
+        input.disabled = false;
       });
 
       let timer = null;
@@ -216,6 +227,71 @@
           submitBtn.disabled = true;
         }
       }
+
+      geoBtn.addEventListener('click', function () {
+        if (!navigator.geolocation) {
+          alert('Geolocation is not supported by your browser.');
+          return;
+        }
+        geoBtn.disabled = true;
+        geoBtn.textContent = 'Locating...';
+        navigator.geolocation.getCurrentPosition(
+          async function (pos) {
+            const { latitude, longitude } = pos.coords;
+            latEl.value = latitude;
+            lonEl.value = longitude;
+            // Reverse geocode using Nominatim
+            let cityLabel = '';
+            try {
+              const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en`;
+              const resp = await fetch(url, {
+                headers: { 'User-Agent': 'weather-app-demo' }
+              });
+              if (resp.ok) {
+                const data = await resp.json();
+                // Try to get city/town/village/hamlet
+                const addr = data.address || {};
+                cityLabel = addr.city || addr.town || addr.village || addr.hamlet || '';
+                const countryCode = addr.country_code ? addr.country_code.toUpperCase() : '';
+                if (cityLabel && countryCode) {
+                  cityLabel = `${cityLabel} ${countryCode}`;
+                }
+              }
+            } catch (e) {
+              // ignore, fallback below
+            }
+            if (!cityLabel) {
+              cityLabel = `${latitude.toFixed(5)},${longitude.toFixed(5)}`;
+            } else {
+              cityLabel = `${cityLabel} (${latitude.toFixed(5)},${longitude.toFixed(5)})`;
+            }
+            input.value = cityLabel;
+            // Do not disable input here, so its value is sent with the form
+            // input.disabled = true;
+            datalist.innerHTML = '';
+            submitBtn.disabled = false;
+            geoBtn.style.display = 'none';
+            resetBtn.style.display = '';
+            geoBtn.textContent = 'Use my location';
+          },
+          function (err) {
+            alert('Unable to retrieve your location.');
+            geoBtn.disabled = false;
+            geoBtn.textContent = 'Use my location';
+          }
+        );
+      });
+
+      resetBtn.addEventListener('click', function () {
+        input.value = '';
+        input.disabled = false;
+        latEl.value = '';
+        lonEl.value = '';
+        submitBtn.disabled = true;
+        geoBtn.style.display = '';
+        resetBtn.style.display = 'none';
+        datalist.innerHTML = '';
+      });
 
       input.addEventListener('input', (e) => {
         handleInput(e);
