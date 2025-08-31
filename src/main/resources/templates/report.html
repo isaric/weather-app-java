@@ -85,6 +85,7 @@
     }
   </style>
   <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body>
@@ -102,16 +103,16 @@
 
     <div id="loading" class="muted">Loading weather data…</div>
 
+    <div id="aiSummary" class="card" style="margin-top: 1rem;">
+      <h2 style="margin-top:0; font-size: 1.2rem;">AI summary & activity suggestions</h2>
+      <div id="aiSummaryContent" class="muted">Generating AI summary…</div>
+    </div>
+
     <div id="charts" class="charts" style="display:none">
       <div id="tempChart" class="chart"></div>
       <div id="precipChart" class="chart"></div>
       <div id="windChart" class="chart"></div>
       <div id="humidityChart" class="chart"></div>
-    </div>
-
-    <div id="aiSummary" class="card" style="margin-top: 1rem;">
-      <h2 style="margin-top:0; font-size: 1.2rem;">AI summary & activity suggestions</h2>
-      <div id="aiSummaryContent" class="muted">Generating AI summary…</div>
     </div>
 
     <script id="report-json" type="application/json" th:utext="${reportJson}">{}</script>
@@ -286,13 +287,8 @@
             return;
           }
           const summary = data?.summary || 'No AI summary available.';
-          target.textContent = '';
-          // Render as simple paragraphs, split on double newlines
-          summary.split(/\n\n+/).forEach(p => {
-            const para = document.createElement('p');
-            para.textContent = p;
-            target.appendChild(para);
-          });
+          // Render markdown using marked.js
+          target.innerHTML = marked.parse(summary);
           target.classList.remove('muted');
         } catch (err) {
           target.textContent = 'AI summary unavailable.';
