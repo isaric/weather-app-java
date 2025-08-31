@@ -17,6 +17,7 @@
       padding: 1.25rem;
       max-width: 1024px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      margin: 0 auto;
     }
 
     h1 {
@@ -40,11 +41,37 @@
       }
     }
 
+    @media (max-width: 900px) {
+      .charts {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .chart {
       width: 100%;
       height: 360px;
       border: 1px solid #f0f0f0;
       border-radius: 6px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        margin: 0.5rem;
+      }
+
+      .card {
+        max-width: 100%;
+        padding: 0.75rem;
+        box-sizing: border-box;
+      }
+
+      h1 {
+        font-size: 1.1rem;
+      }
+
+      .chart {
+        height: 220px;
+      }
     }
 
     .back {
@@ -86,6 +113,9 @@
       google.charts.load('current', { packages: ['corechart'] });
       google.charts.setOnLoadCallback(drawCharts);
 
+      // Store chart data/options for redraw
+      let chartDataCache = {};
+
       function drawCharts() {
         const jsonEl = document.getElementById('report-json');
         if (!jsonEl) return;
@@ -104,39 +134,50 @@
         // Helper to convert ISO datetime string to JS Date
         const toDate = (s) => new Date(String(s).replace(' ', 'T'));
 
-        // Build data tables
-        drawLineChart(
-          'tempChart',
-          'Temperature 2m (°C)',
-          ['Time', 'Temperature (°C)'],
-          report.times.map((t, i) => [toDate(t), safeNumber(report.temperature_2m[i])])
-        );
+        // Prepare data for charts and cache for redraw
+        chartDataCache = {
+          tempChart: {
+            type: 'LineChart',
+            title: 'Temperature 2m (°C)',
+            columns: ['Time', 'Temperature (°C)'],
+            rows: report.times.map((t, i) => [toDate(t), safeNumber(report.temperature_2m[i])])
+          },
+          precipChart: {
+            type: 'ColumnChart',
+            title: 'Precipitation (mm)',
+            columns: ['Time', 'Precipitation (mm)'],
+            rows: report.times.map((t, i) => [toDate(t), safeNumber(report.precipitation?.[i])])
+          },
+          windChart: {
+            type: 'LineChart',
+            title: 'Wind speed 10m (m/s)',
+            columns: ['Time', 'Wind speed (m/s)'],
+            rows: report.times.map((t, i) => [toDate(t), safeNumber(report.wind_speed_10m?.[i])])
+          },
+          humidityChart: {
+            type: 'LineChart',
+            title: 'Relative humidity 2m (%)',
+            columns: ['Time', 'Humidity (%)'],
+            rows: report.times.map((t, i) => [toDate(t), safeNumber(report.relative_humidity_2m?.[i])])
+          }
+        };
 
-        drawColumnChart(
-          'precipChart',
-          'Precipitation (mm)',
-          ['Time', 'Precipitation (mm)'],
-          report.times.map((t, i) => [toDate(t), safeNumber(report.precipitation?.[i])])
-        );
-
-        drawLineChart(
-          'windChart',
-          'Wind speed 10m (m/s)',
-          ['Time', 'Wind speed (m/s)'],
-          report.times.map((t, i) => [toDate(t), safeNumber(report.wind_speed_10m?.[i])])
-        );
-
-        drawLineChart(
-          'humidityChart',
-          'Relative humidity 2m (%)',
-          ['Time', 'Humidity (%)'],
-          report.times.map((t, i) => [toDate(t), safeNumber(report.relative_humidity_2m?.[i])])
-        );
+        redrawAllCharts();
       }
 
       function safeNumber(v) {
         const n = Number(v);
         return Number.isFinite(n) ? n : null;
+      }
+
+      function redrawAllCharts() {
+        for (const [id, chartInfo] of Object.entries(chartDataCache)) {
+          if (chartInfo.type === 'LineChart') {
+            drawLineChart(id, chartInfo.title, chartInfo.columns, chartInfo.rows);
+          } else if (chartInfo.type === 'ColumnChart') {
+            drawColumnChart(id, chartInfo.title, chartInfo.columns, chartInfo.rows);
+          }
+        }
       }
 
       function drawLineChart(elementId, title, columns, rows) {
@@ -147,7 +188,8 @@
         const options = {
           title: title,
           legend: { position: 'none' },
-          height: 360,
+          height: document.getElementById(elementId)?.offsetHeight || 360,
+          width: document.getElementById(elementId)?.offsetWidth || undefined,
           hAxis: { format: 'M/d HH:mm' },
           chartArea: { left: 60, top: 40, width: '80%', height: '70%' }
         };
@@ -163,13 +205,21 @@
         const options = {
           title: title,
           legend: { position: 'none' },
-          height: 360,
+          height: document.getElementById(elementId)?.offsetHeight || 360,
+          width: document.getElementById(elementId)?.offsetWidth || undefined,
           hAxis: { format: 'M/d HH:mm' },
           chartArea: { left: 60, top: 40, width: '80%', height: '70%' }
         };
         const chart = new google.visualization.ColumnChart(document.getElementById(elementId));
         chart.draw(data, options);
       }
+
+      // Redraw charts on window resize
+      window.addEventListener('resize', () => {
+        if (Object.keys(chartDataCache).length > 0) {
+          redrawAllCharts();
+        }
+      });
     </script>
   </div>
 </body>
