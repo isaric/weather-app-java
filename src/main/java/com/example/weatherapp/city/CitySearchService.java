@@ -7,13 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -23,8 +16,7 @@ import java.util.stream.Collectors;
 @Service
 public class CitySearchService {
 
-    private static final String CLASSPATH_JSON = "city_search/cities.json";
-    private static final String FALLBACK_URL = "https://raw.githubusercontent.com/isaric/weather-app/main/city_search/cities.json";
+    private static final String CLASSPATH_JSON = "cities.json";
 
     private final Object lock = new Object();
     private volatile List<City> cached;
@@ -84,9 +76,6 @@ public class CitySearchService {
         synchronized (lock) {
             if (cached != null) return cached;
             List<City> loaded = tryLoadFromClasspath();
-            if (loaded.isEmpty()) {
-                loaded = tryLoadFromWeb();
-            }
             cached = loaded;
             return cached;
         }
@@ -102,28 +91,5 @@ public class CitySearchService {
         } catch (IOException e) {
             return Collections.emptyList();
         }
-    }
-
-    private List<City> tryLoadFromWeb() {
-        try {
-            HttpClient client = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofSeconds(10))
-                    .build();
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create(FALLBACK_URL))
-                    .timeout(Duration.ofSeconds(20))
-                    .GET()
-                    .build();
-            HttpResponse<byte[]> resp = client.send(req, HttpResponse.BodyHandlers.ofByteArray());
-            if (resp.statusCode() >= 200 && resp.statusCode() < 300) {
-                byte[] body = resp.body();
-                if (body == null || body.length == 0) return Collections.emptyList();
-                try (InputStream is = new java.io.ByteArrayInputStream(body)) {
-                    return mapper.readValue(is, new TypeReference<List<City>>() {});
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        return new ArrayList<>();
     }
 }
