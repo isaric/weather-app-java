@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather App (Spring Boot + Thymeleaf + LangChain4j)</title>
+    <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; margin: 2rem; }
+        .card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.25rem; max-width: 720px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        h1 { margin-top: 0; font-size: 1.5rem; }
+        .muted { color: #666; }
+        code { background: #f6f8fa; padding: 0.15rem 0.35rem; border-radius: 4px; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1 th:text="${message}">Welcome to Weather App!</h1>
+    <p class="muted">
+        This page is rendered with <strong>Thymeleaf</strong> and the greeting message
+        is generated using <strong>LangChain4j</strong>'s <code>PromptTemplate</code> on the server side.
+    </p>
+    <p>
+        Today: <strong th:text="${today}">2025-08-31</strong>
+    </p>
+    <hr />
+    <p>
+        Try running: <code>./gradlew bootRun</code> (or <code>gradle bootRun</code>) and open
+        <a href="http://localhost:8080">http://localhost:8080</a>.
+    </p>
+</div>
+</body>
+</html>
