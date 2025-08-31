@@ -83,9 +83,22 @@
       color: #b00020;
       font-weight: 600;
     }
+
+    .map-container {
+      width: 100%;
+      height: 340px;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+    }
   </style>
   <script src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
 
 <body>
@@ -97,6 +110,9 @@
       (<span id="lat-value" th:text="${lat}">lat</span>, <span id="lon-value" th:text="${lon}">lon</span>)
     </h1>
     <p class="muted">Timezone: <span id="timezone">auto</span></p>
+
+    <!-- Map container -->
+    <div id="map" class="map-container"></div>
 
     <div th:if="${error}" id="server-error" class="error" th:text="${error}">An error occurred</div>
     <div id="client-error" class="error" style="display:none"></div>
@@ -138,7 +154,17 @@
           showClientError('Invalid coordinates.');
           return;
         }
+        initMap(lat, lon); // <-- Add this line to initialize the map
         fetchAndDraw(lat, lon);
+      }
+
+      // Initialize Leaflet map
+      function initMap(lat, lon) {
+        const map = L.map('map').setView([lat, lon], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        L.marker([lat, lon]).addTo(map);
       }
 
       async function fetchAndDraw(lat, lon) {
