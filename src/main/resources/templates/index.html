@@ -1,151 +1,217 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
+
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Weather App (Spring Boot + Thymeleaf + LangChain4j)</title>
-    <style>
-        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; margin: 2rem; }
-        .card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.25rem; max-width: 720px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-        h1 { margin-top: 0; font-size: 1.5rem; }
-        .muted { color: #666; }
-        code { background: #f6f8fa; padding: 0.15rem 0.35rem; border-radius: 4px; }
-        .form-row { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
-        label { font-weight: 600; }
-        input[type="text"] { padding: 0.5rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 6px; }
-        button { padding: 0.5rem 1rem; font-size: 1rem; border: 1px solid #0d6efd; background: #0d6efd; color: white; border-radius: 6px; cursor: pointer; }
-        button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .hint { color: #666; font-size: 0.9rem; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather App (Spring Boot + Thymeleaf + LangChain4j)</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+      margin: 2rem;
+    }
+
+    .card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 1.25rem;
+      max-width: 720px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 1.5rem;
+    }
+
+    .muted {
+      color: #666;
+    }
+
+    code {
+      background: #f6f8fa;
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    label {
+      font-weight: 600;
+    }
+
+    input[type="text"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #0d6efd;
+      background: #0d6efd;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .hint {
+      color: #666;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
+
 <body>
-<div class="card">
+  <div class="card">
     <h1 th:text="${message}">Welcome to Weather App!</h1>
     <p class="muted">
-        This page is rendered with <strong>Thymeleaf</strong> and the greeting message
-        is generated using <strong>LangChain4j</strong>'s <code>PromptTemplate</code> on the server side.
+      This page is rendered with <strong>Thymeleaf</strong> and the greeting message
+      is generated using <strong>LangChain4j</strong>'s <code>PromptTemplate</code> on the server side.
     </p>
     <p>
-        Today: <strong th:text="${today}">2025-08-31</strong>
+      Today: <strong th:text="${today}">2025-08-31</strong>
     </p>
     <hr />
     <p>
-        Try running: <code>./gradlew bootRun</code> (or <code>gradle bootRun</code>) and open
-        <a href="http://localhost:8080">http://localhost:8080</a>.
+      Try running: <code>./gradlew bootRun</code> (or <code>gradle bootRun</code>) and open
+      <a href="http://localhost:8080">http://localhost:8080</a>.
     </p>
 
     <hr />
     <form id="location-form" class="form-row" method="get" action="/report">
-        <label for="city-input">Your town/city</label>
-        <input id="city-input" name="city" type="text" list="city-suggestions" placeholder="Start typing your town..." autocomplete="off" />
-        <input type="hidden" id="lat" name="lat" />
-        <input type="hidden" id="lon" name="lon" />
-        <datalist id="city-suggestions"></datalist>
-        <div class="hint">Type more than 3 words to trigger suggestions (or more than 3 characters). Select an option like "City CC (lat,lon)" to enable submit.</div>
-        <button id="submit-btn" type="submit" disabled>Submit</button>
+      <label for="city-input">Your town/city</label>
+      <input id="city-input" name="city" type="text" list="city-suggestions" placeholder="Start typing your town..."
+        autocomplete="off" />
+      <input type="hidden" id="lat" name="lat" />
+      <input type="hidden" id="lon" name="lon" />
+      <datalist id="city-suggestions"></datalist>
+      <div class="hint">Type more than 3 words to trigger suggestions (or more than 3 characters). Select an option like
+        "City CC (lat,lon)" to enable submit.</div>
+      <button id="submit-btn" type="submit" disabled>Submit</button>
     </form>
-</div>
+  </div>
 
-<script>
-(function(){
-  const input = document.getElementById('city-input');
-  const datalist = document.getElementById('city-suggestions');
-  const form = document.getElementById('location-form');
+  <script>
+    (function () {
+      const input = document.getElementById('city-input');
+      const datalist = document.getElementById('city-suggestions');
+      const form = document.getElementById('location-form');
 
-  // Validate before submission: ensure we have parsed coordinates
-  form.addEventListener('submit', function(e){
-    const lat = document.getElementById('lat').value;
-    const lon = document.getElementById('lon').value;
-    if (!lat || !lon) {
-      e.preventDefault();
-      alert('Please select a location from suggestions to include coordinates.');
-    }
-  });
+      // Validate before submission: ensure we have parsed coordinates
+      form.addEventListener('submit', function (e) {
+        const lat = document.getElementById('lat').value;
+        const lon = document.getElementById('lon').value;
+        if (!lat || !lon) {
+          e.preventDefault();
+          alert('Please select a location from suggestions to include coordinates.');
+          return;
+        }
+        // Modify city input to only send first word up to first comma
+        const input = document.getElementById('city-input');
+        const cityVal = input.value || '';
+        // Extract up to first comma, or first word if no comma
+        let cityFirstWord = cityVal.split(',')[0].trim().split(/\s+/)[0];
+        input.value = cityFirstWord;
+      });
 
-  let timer = null;
-  const debounce = (fn, delay=250) => {
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn.apply(null, args), delay);
-    };
-  };
+      let timer = null;
+      const debounce = (fn, delay = 250) => {
+        return (...args) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => fn.apply(null, args), delay);
+        };
+      };
 
-  function shouldSearch(text) {
-    const t = (text || '').trim();
-    if (!t) return false;
-    const chars = t.length;
-    const words = t.split(/\s+/).filter(Boolean).length;
-    // The issue text says "more than 3 words"; we also allow >3 characters to be user-friendly
-    return words > 3 || chars > 3;
-  }
+      function shouldSearch(text) {
+        const t = (text || '').trim();
+        if (!t) return false;
+        const chars = t.length;
+        const words = t.split(/\s+/).filter(Boolean).length;
+        // The issue text says "more than 3 words"; we also allow >3 characters to be user-friendly
+        return words > 3 || chars > 3;
+      }
 
-  async function fetchSuggestions(q) {
-    try {
-      const resp = await fetch(`/api/cities/search?q=${encodeURIComponent(q)}&limit=10`);
-      if (!resp.ok) return [];
-      return await resp.json();
-    } catch (e) {
-      return [];
-    }
-  }
+      async function fetchSuggestions(q) {
+        try {
+          const resp = await fetch(`/api/cities/search?q=${encodeURIComponent(q)}&limit=10`);
+          if (!resp.ok) return [];
+          return await resp.json();
+        } catch (e) {
+          return [];
+        }
+      }
 
-  function setSuggestions(list) {
-    datalist.innerHTML = '';
-    (list || []).forEach(item => {
-      const opt = document.createElement('option');
-      opt.value = item; // using formatted suggestion string as the value
-      datalist.appendChild(opt);
-    });
-  }
+      function setSuggestions(list) {
+        datalist.innerHTML = '';
+        (list || []).forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item; // using formatted suggestion string as the value
+          datalist.appendChild(opt);
+        });
+      }
 
-  const handleInput = debounce(async function(e){
-    const q = e.target.value || '';
-    if (!shouldSearch(q)) {
-      setSuggestions([]);
-      return;
-    }
-    const suggestions = await fetchSuggestions(q);
-    setSuggestions(suggestions);
-  }, 250);
+      const handleInput = debounce(async function (e) {
+        const q = e.target.value || '';
+        if (!shouldSearch(q)) {
+          setSuggestions([]);
+          return;
+        }
+        const suggestions = await fetchSuggestions(q);
+        setSuggestions(suggestions);
+      }, 250);
 
-  function parseCoordsFromInput(val){
-    // Match last pair of parentheses with two numbers: (lat,lon)
-    const m = (val || '').match(/\(([-+]?\d*\.?\d+),\s*([-+]?\d*\.?\d+)\)\s*$/);
-    if (!m) return null;
-    const lat = parseFloat(m[1]);
-    const lon = parseFloat(m[2]);
-    if (Number.isFinite(lat) && Number.isFinite(lon)) return {lat, lon};
-    return null;
-  }
+      function parseCoordsFromInput(val) {
+        // Match last pair of parentheses with two numbers: (lat,lon)
+        const m = (val || '').match(/\(([-+]?\d*\.?\d+),\s*([-+]?\d*\.?\d+)\)\s*$/);
+        if (!m) return null;
+        const lat = parseFloat(m[1]);
+        const lon = parseFloat(m[2]);
+        if (Number.isFinite(lat) && Number.isFinite(lon)) return { lat, lon };
+        return null;
+      }
 
-  function updateStateFromInput(){
-    const val = input.value || '';
-    const coords = parseCoordsFromInput(val);
-    const submitBtn = document.getElementById('submit-btn');
-    const latEl = document.getElementById('lat');
-    const lonEl = document.getElementById('lon');
-    if (coords){
-      latEl.value = coords.lat;
-      lonEl.value = coords.lon;
-      submitBtn.disabled = false;
-    } else {
-      latEl.value = '';
-      lonEl.value = '';
-      submitBtn.disabled = true;
-    }
-  }
+      function updateStateFromInput() {
+        const val = input.value || '';
+        const coords = parseCoordsFromInput(val);
+        const submitBtn = document.getElementById('submit-btn');
+        const latEl = document.getElementById('lat');
+        const lonEl = document.getElementById('lon');
+        if (coords) {
+          latEl.value = coords.lat;
+          lonEl.value = coords.lon;
+          submitBtn.disabled = false;
+        } else {
+          latEl.value = '';
+          lonEl.value = '';
+          submitBtn.disabled = true;
+        }
+      }
 
-  input.addEventListener('input', (e) => {
-    handleInput(e);
-    updateStateFromInput();
-  });
+      input.addEventListener('input', (e) => {
+        handleInput(e);
+        updateStateFromInput();
+      });
 
-  // Also run on blur in case selection happens via click on datalist
-  input.addEventListener('change', updateStateFromInput);
+      // Also run on blur in case selection happens via click on datalist
+      input.addEventListener('change', updateStateFromInput);
 
-  // Init state
-  updateStateFromInput();
-})();
-</script>
+      // Init state
+      updateStateFromInput();
+    })();
+  </script>
 </body>
+
 </html>
