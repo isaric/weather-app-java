@@ -16,7 +16,7 @@ public class HomeController {
     @GetMapping("/")
     public String home(Model model) {
         // Use LangChain4j's PromptTemplate to generate a dynamic message without calling an external API
-        PromptTemplate template = PromptTemplate.from("Welcome to Weather App, {name}! Today is {date}.");
+        PromptTemplate template = PromptTemplate.from("Welcome to Weather App, {{name}}! Today is {{date}}.");
         Prompt prompt = template.apply(Map.of(
                 "name", "Traveler",
                 "date", LocalDate.now().format(DateTimeFormatter.ISO_DATE)
