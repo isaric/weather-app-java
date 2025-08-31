@@ -77,10 +77,6 @@
 <body>
   <div class="card">
     <h1 th:text="${message}">Welcome to Weather App!</h1>
-    <p class="muted">
-      This page is rendered with <strong>Thymeleaf</strong> and the greeting message
-      is generated using <strong>LangChain4j</strong>'s <code>PromptTemplate</code> on the server side.
-    </p>
     <hr />
     <form id="location-form" class="form-row" method="get" action="/report">
       <label for="city-input">Your town/city</label>
@@ -89,7 +85,7 @@
       <input type="hidden" id="lat" name="lat" />
       <input type="hidden" id="lon" name="lon" />
       <datalist id="city-suggestions"></datalist>
-      <div class="hint">Type more than 3 words to trigger suggestions (or more than 3 characters). Select an option like
+      <div class="hint">Type more than 3 characters. Select an option like
         "City CC (lat,lon)" to enable submit.</div>
       <button id="submit-btn" type="submit" disabled>Submit</button>
     </form>
