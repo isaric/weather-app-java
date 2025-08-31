@@ -92,10 +92,10 @@
     <a href="/" class="back">← Back</a>
     <h1>
       Weather report
-      <span th:if="${city}">for <span th:text="${city}"></span></span>
+      <span th:if="${city}">for <span id="cityName" th:text="${city}"></span></span>
       (<span th:text="${lat}">lat</span>, <span th:text="${lon}">lon</span>)
     </h1>
-    <p class="muted">Timezone: <span th:text="${timezone}">auto</span></p>
+    <p class="muted">Timezone: <span id="tz" th:text="${timezone}">auto</span></p>
 
     <div th:if="${error}" class="error" th:text="${error}">An error occurred</div>
 
@@ -104,6 +104,11 @@
       <div id="precipChart" class="chart"></div>
       <div id="windChart" class="chart"></div>
       <div id="humidityChart" class="chart"></div>
+    </div>
+
+    <div id="aiSummary" class="card" style="margin-top: 1rem;">
+      <h2 style="margin-top:0; font-size: 1.2rem;">AI summary & activity suggestions</h2>
+      <div id="aiSummaryContent" class="muted">Generating AI summary…</div>
     </div>
 
     <script id="report-json" type="application/json" th:utext="${reportJson}">{}</script>
@@ -117,6 +122,8 @@
       let chartDataCache = {};
 
       function drawCharts() {
+        // Kick off AI summary fetch in parallel and not blocking charts
+        fetchAiSummary();
         const jsonEl = document.getElementById('report-json');
         if (!jsonEl) return;
         let report;
@@ -212,6 +219,50 @@
         };
         const chart = new google.visualization.ColumnChart(document.getElementById(elementId));
         chart.draw(data, options);
+      }
+
+      async function fetchAiSummary() {
+        const jsonEl = document.getElementById('report-json');
+        const target = document.getElementById('aiSummaryContent');
+        if (!jsonEl || !target) return;
+        let report;
+        try {
+          report = JSON.parse(jsonEl.textContent || '{}');
+        } catch (e) {
+          target.textContent = 'AI summary unavailable (invalid report data).';
+          return;
+        }
+        try {
+          const params = new URLSearchParams();
+          const tz = document.getElementById('tz')?.textContent || undefined;
+          const city = document.getElementById('cityName')?.textContent || undefined;
+          if (tz) params.set('timezone', tz);
+          if (city) params.set('city', city);
+
+          const resp = await fetch('/api/ai-summary' + (params.toString() ? ('?' + params.toString()) : ''), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(report)
+          });
+          const data = await resp.json();
+          if (!resp.ok) {
+            target.textContent = data?.summary || 'AI summary failed.';
+            target.classList.remove('muted');
+            return;
+          }
+          const summary = data?.summary || 'No AI summary available.';
+          target.textContent = '';
+          // Render as simple paragraphs, split on double newlines
+          summary.split(/\n\n+/).forEach(p => {
+            const para = document.createElement('p');
+            para.textContent = p;
+            target.appendChild(para);
+          });
+          target.classList.remove('muted');
+        } catch (err) {
+          target.textContent = 'AI summary unavailable.';
+          target.classList.remove('muted');
+        }
       }
 
       // Redraw charts on window resize
