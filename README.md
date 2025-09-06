@@ -12,6 +12,8 @@ A web application for providing a weather report along with an AI summary with a
 - **AI-Powered Summaries**: Generate human-readable weather summaries using Google's Gemini AI
 - **Responsive Web Interface**: User-friendly interface built with Thymeleaf templates
 
+---
+
 ## Technologies Used
 
 - **Java 21**: Modern Java language features
@@ -23,6 +25,17 @@ A web application for providing a weather report along with an AI summary with a
 - **Open-Meteo API**: Weather data provider (client-side integration)
 - **Gradle**: Build and dependency management
 
+---
+## 🚀 AI-Powered Development
+
+This project embraces the power of state-of-the-art AI tools to accelerate development, improve code quality, and create intelligent weather summaries:
+
+- **GitHub Copilot**: Used extensively for smart code completion, suggestions, and refactoring.
+- **JetBrains Junie**: Provided advanced AI-assisted programming and code review within the IDE.
+- **LangChain4j**: Integrated for building AI-powered Java workflows and enabling seamless interaction with LLMs.
+- **Google AI Studio Gemini Models**: Leveraged to generate insightful and contextual weather data summaries for each city.
+
+---
 ## Setup and Installation
 
 ### Prerequisites
@@ -73,6 +86,7 @@ docker run -p 8080:8080 -e AI_API_KEY=your_gemini_api_key weather-app-java
 ```
 
 The application will be available at http://localhost:8080
+---
 
 ## Usage
 
@@ -80,6 +94,8 @@ The application will be available at http://localhost:8080
 2. Search for a city using the search box
 3. View the weather report for the selected location
 4. Read the AI-generated summary for practical insights and activity suggestions
+
+---
 
 ## API Endpoints
 
@@ -98,6 +114,7 @@ The application will be available at http://localhost:8080
     - `timezone`: Optional timezone
     - `city`: Optional city name
 
+---
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -108,6 +125,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+---
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
