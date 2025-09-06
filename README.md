@@ -1,6 +1,7 @@
 # Weather App Java
 
 ![CI Status](https://github.com/isaric/weather-app-java/actions/workflows/ci.yml/badge.svg?branch=main)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-isaricpv/weather--app--java-blue?logo=docker)](https://hub.docker.com/r/isaricpv/weather-app-java)
 
 A web application for providing a weather report along with an AI summary with a Java backend.
 
