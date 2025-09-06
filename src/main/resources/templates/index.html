@@ -6,123 +6,194 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Weather App (Spring Boot + Thymeleaf + LangChain4j)</title>
   <style>
+      :root {
+          color-scheme: light dark;
+          --bg: #0b1020;
+          --panel: #141a2f;
+          --text: #e6e9f0;
+          --muted: #9aa3b2;
+          --primary: #4f8cff;
+          --primary-contrast: #ffffff;
+          --border: #23304d;
+          --focus: #a3c5ff;
+      }
+
+      @media (prefers-color-scheme: light) {
+          :root {
+              --bg: #f7f9fc;
+              --panel: #ffffff;
+              --text: #172033;
+              --muted: #51607a;
+              --primary: #0d6efd;
+              --primary-contrast: #ffffff;
+              --border: #e5eaf2;
+              --focus: #5aa1ff;
+          }
+      }
+
+      * {
+          box-sizing: border-box;
+      }
+
+      html, body {
+          height: 100%;
+      }
     body {
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-      margin: 2rem;
+        margin: 0;
+        background: radial-gradient(1200px 800px at 100% 0%, rgba(79, 140, 255, 0.12), transparent 60%),
+        radial-gradient(1000px 700px at 0% 100%, rgba(71, 182, 255, 0.12), transparent 60%),
+        var(--bg);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+      .wrap {
+          min-height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 10vh 1rem 6vh;
     }
 
     .card {
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
       padding: 1.25rem;
+        width: 100%;
       max-width: 720px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-      margin: 0 auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0)), var(--panel);
+        backdrop-filter: blur(6px);
     }
-
-    h1 {
-      margin-top: 0;
-      font-size: 1.5rem;
-    }
-
-    .muted {
-      color: #666;
-    }
-
-    code {
-      background: #f6f8fa;
-      padding: 0.15rem 0.35rem;
-      border-radius: 4px;
-    }
-
-    .form-row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-
-    label {
-      font-weight: 600;
-    }
-
-    input[type="text"] {
-      padding: 0.5rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    button {
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      border: 1px solid #0d6efd;
-      background: #0d6efd;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .hint {
-      color: #666;
-      font-size: 0.9rem;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        margin: 0.5rem;
-      }
-
-      .card {
-        max-width: 100%;
-        padding: 0.75rem;
-        box-sizing: border-box;
-      }
 
       h1 {
-        font-size: 1.1rem;
+          margin: 0 0 0.25rem 0;
+          font-size: 1.5rem;
+          letter-spacing: .2px;
       }
 
-      input[type="text"],
-      button {
-        font-size: 0.95rem;
+      .muted {
+          color: var(--muted);
       }
 
       .form-row {
-        gap: 0.35rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          margin-top: 1rem;
+      }
+
+      label {
+          font-weight: 600;
+      }
+
+    input[type="text"] {
+        padding: 0.9rem 0.9rem;
+      font-size: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: color-mix(in oklab, var(--panel), #ffffff 3%);
+        color: var(--text);
+        outline: none;
+    }
+
+      input[type="text"]:focus {
+          border-color: var(--focus);
+          box-shadow: 0 0 0 3px color-mix(in oklab, var(--focus), transparent 80%);
+      }
+
+      .row-inline {
+          display: flex;
+          gap: 0.5rem;
+          align-items: stretch;
+      }
+
+    button {
+        padding: 0.9rem 1rem;
+      font-size: 1rem;
+        border: 1px solid var(--primary);
+        background: var(--primary);
+        color: var(--primary-contrast);
+        border-radius: 12px;
+      cursor: pointer;
+        min-height: 44px;
+    }
+
+      button.secondary {
+          background: transparent;
+          color: var(--primary);
+          border-color: var(--border);
+      }
+
+      button:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
       }
 
       .hint {
-        font-size: 0.85rem;
+          color: var(--muted);
+          font-size: 0.95rem;
       }
+
+      footer {
+          text-align: center;
+          margin-top: 1rem;
+          font-size: .9rem;
+          color: var(--muted);
+      }
+
+    @media (max-width: 600px) {
+        .wrap {
+            padding: 6vh 0.75rem;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+        }
+
+        .row-inline {
+            flex-wrap: wrap;
+        }
+
+        .row-inline > * {
+            flex: 1 1 100%;
+        }
+
+        button {
+            width: 100%;
+        }
     }
   </style>
 </head>
 
 <body>
-  <div class="card">
-    <h1 th:text="${message}">Welcome to Weather App!</h1>
-    <hr />
-    <form id="location-form" class="form-row" method="get" action="/report">
-      <label for="city-input">Your town/city</label>
-      <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <input id="city-input" name="city" type="text" list="city-suggestions" placeholder="Start typing your town..."
-          autocomplete="off" style="flex: 1 1 auto;" />
-        <button type="button" id="geo-btn" title="Use my location" style="white-space: nowrap;">Use my location</button>
-        <button type="button" id="reset-btn" style="display:none;">Reset</button>
-      </div>
-      <input type="hidden" id="lat" name="lat" />
-      <input type="hidden" id="lon" name="lon" />
-      <datalist id="city-suggestions"></datalist>
-      <div class="hint">Type more than 3 characters. Select an option like
-        "City CC (lat,lon)" to enable submit.</div>
-      <button id="submit-btn" type="submit" disabled>Submit</button>
-    </form>
+<div class="wrap">
+    <div class="card">
+        <h1 th:text="${message}">Welcome to Weather App!</h1>
+        <p class="muted">Find your location to view a rich, mobile-friendly weather report.</p>
+        <form id="location-form" class="form-row" method="get" action="/report" novalidate>
+            <label for="city-input">Your town or city</label>
+            <div class="row-inline">
+                <input id="city-input" name="city" type="text" list="city-suggestions"
+                       placeholder="Start typing your town..."
+                       autocomplete="off"/>
+                <button type="button" id="geo-btn" title="Use my location">Use my location</button>
+                <button type="button" class="secondary" id="reset-btn" style="display:none;">Reset</button>
+            </div>
+            <input type="hidden" id="lat" name="lat"/>
+            <input type="hidden" id="lon" name="lon"/>
+            <datalist id="city-suggestions"></datalist>
+            <div class="hint">Type at least 4 characters or pick from suggestions like
+                "City CC (lat,lon)". You can also use your current location.
+            </div>
+            <button id="submit-btn" type="submit" disabled>View report</button>
+        </form>
+        <footer>
+            Powered by Spring Boot & Leaflet · AI summaries via Gemini when configured
+        </footer>
+    </div>
   </div>
 
   <script>
