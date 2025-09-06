@@ -1,5 +1,7 @@
 # Weather App Java
 
+![CI Status](https://github.com/isaric/weather-app-java/actions/workflows/ci.yml/badge.svg?branch=main)
+
 A web application for providing a weather report along with an AI summary with a Java backend.
 
 ## Features
