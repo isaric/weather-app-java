@@ -24,7 +24,6 @@ public class HomeControllerIntegrationTest {
 
     @Test
     public void homePageShouldReturnIndexTemplate() throws Exception {
-        // Test that the home page loads correctly
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
@@ -34,7 +33,6 @@ public class HomeControllerIntegrationTest {
 
     @Test
     public void homePageShouldContainWelcomeMessage() throws Exception {
-        // Test that the welcome message contains the expected text and today's date
         String today = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
         
         mockMvc.perform(get("/"))

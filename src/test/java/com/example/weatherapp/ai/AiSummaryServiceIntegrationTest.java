@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,26 +20,22 @@ public class AiSummaryServiceIntegrationTest {
 
     @Test
     public void isConfiguredShouldReturnTrueWhenApiKeyIsSet() {
-        // The test profile sets a test API key
         assertThat(aiSummaryService.isConfigured()).isTrue();
     }
 
     @Test
     public void isConfiguredShouldReturnFalseWhenApiKeyIsEmpty() {
-        // Temporarily set the API key to empty
         String originalApiKey = (String) ReflectionTestUtils.getField(aiSummaryService, "apiKey");
         try {
             ReflectionTestUtils.setField(aiSummaryService, "apiKey", "");
             assertThat(aiSummaryService.isConfigured()).isFalse();
         } finally {
-            // Restore the original API key
             ReflectionTestUtils.setField(aiSummaryService, "apiKey", originalApiKey);
         }
     }
 
     @Test
     public void summarizeShouldReturnMessageWhenNotConfigured() {
-        // Temporarily set the API key to empty
         String originalApiKey = (String) ReflectionTestUtils.getField(aiSummaryService, "apiKey");
         try {
             ReflectionTestUtils.setField(aiSummaryService, "apiKey", "");
@@ -49,26 +45,24 @@ public class AiSummaryServiceIntegrationTest {
             
             assertThat(summary).isEqualTo("AI summary unavailable: missing Google Gemini API key.");
         } finally {
-            // Restore the original API key
             ReflectionTestUtils.setField(aiSummaryService, "apiKey", originalApiKey);
         }
     }
 
-    // Helper method to create a sample weather report for testing
     private WeatherReport createSampleWeatherReport() {
-        WeatherReport report = new WeatherReport();
-        report.setLatitude(40.7128);
-        report.setLongitude(-74.0060);
-        report.setTimezone("America/New_York");
-        
-        WeatherReport.Hourly hourly = new WeatherReport.Hourly();
-        hourly.setTime(Arrays.asList("2023-01-01T00:00", "2023-01-01T01:00"));
-        hourly.setTemperature2m(Arrays.asList(20.5, 21.0));
-        hourly.setPrecipitation(Arrays.asList(0.0, 0.0));
-        hourly.setWindSpeed10m(Arrays.asList(5.0, 5.5));
-        hourly.setRelativeHumidity2m(Arrays.asList(65.0, 70.0));
-        report.setHourly(hourly);
-        
-        return report;
+        WeatherReport.Hourly hourly = new WeatherReport.Hourly(
+                List.of("2023-01-01T00:00", "2023-01-01T01:00"),
+                List.of(20.5, 21.0),
+                List.of(0.0, 0.0),
+                List.of(5.0, 5.5),
+                List.of(65.0, 70.0)
+        );
+
+        return new WeatherReport(
+                40.7128,
+                -74.0060,
+                "America/New_York",
+                hourly
+        );
     }
 }

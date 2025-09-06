@@ -6,53 +6,50 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
+
+import static java.lang.Integer.MAX_VALUE;
+import static java.util.Locale.ROOT;
+import static java.util.Objects.compare;
 
 @Service
 public class CitySearchService {
 
     private static final String CLASSPATH_JSON = "cities.json";
 
-    private final Object lock = new Object();
+    private final ReentrantLock lock = new ReentrantLock();
     private volatile List<City> cached;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
     public List<String> searchSuggestions(String query, int limit) {
         if (query == null) return Collections.emptyList();
-        String q = query.trim().toLowerCase(Locale.ROOT);
+        final var q = query.trim().toLowerCase(ROOT);
         if (q.isEmpty()) return Collections.emptyList();
 
-        List<City> all = loadAllCities();
+        final var all = loadAllCities();
         if (all.isEmpty()) return Collections.emptyList();
 
-        // Simple case-insensitive substring match against name and optionally state
-        List<City> matched = all.stream()
+        final var matched = all.stream()
                 .filter(c -> {
-                    String name = safeLower(c.getName());
-                    String state = safeLower(c.getState());
+                    String name = safeLower(c.name());
+                    String state = safeLower(c.state());
                     return (name != null && name.contains(q)) || (state != null && state.contains(q));
                 })
-                .limit(Math.max(limit, 10) * 10L) // scan a bit more then trim to allow for simple ordering
-                .collect(Collectors.toList());
-
-        // Basic ordering: starts-with first, then by name length, then lexicographically
-        matched.sort((a, b) -> {
-            String an = safeLower(a.getName());
-            String bn = safeLower(b.getName());
-            int as = startsWithScore(an, q) - startsWithScore(bn, q);
-            if (as != 0) return -as; // higher score first
-            int al = an != null ? an.length() : Integer.MAX_VALUE;
-            int bl = bn != null ? bn.length() : Integer.MAX_VALUE;
-            int cmp = Integer.compare(al, bl);
-            if (cmp != 0) return cmp;
-            return Objects.compare(an, bn, String::compareTo);
-        });
+                .limit(Math.max(limit, 10) * 10L).sorted((a, b) -> {
+                    final var an = safeLower(a.name());
+                    final var bn = safeLower(b.name());
+                    final var as = startsWithScore(an, q) - startsWithScore(bn, q);
+                    if (as != 0) return -as; // higher score first
+                    final var al = an != null ? an.length() : MAX_VALUE;
+                    final var bl = bn != null ? bn.length() : MAX_VALUE;
+                    final var cmp = Integer.compare(al, bl);
+                    if (cmp != 0) return cmp;
+                    return compare(an, bn, String::compareTo);
+                }).toList();
 
         return matched.stream()
                 .map(City::toSuggestionString)
@@ -67,26 +64,29 @@ public class CitySearchService {
     }
 
     private static String safeLower(String s) {
-        return s == null ? null : s.toLowerCase(Locale.ROOT);
+        return s == null ? null : s.toLowerCase(ROOT);
     }
 
     private List<City> loadAllCities() {
-        List<City> local = cached;
+        final var local = cached;
         if (local != null) return local;
-        synchronized (lock) {
+        lock.lock();
+        try {
             if (cached != null) return cached;
-            List<City> loaded = tryLoadFromClasspath();
-            cached = loaded;
+            cached = tryLoadFromClasspath();
             return cached;
+        } finally {
+            lock.unlock();
         }
     }
 
     private List<City> tryLoadFromClasspath() {
         try {
-            ClassPathResource resource = new ClassPathResource(CLASSPATH_JSON);
+            final var resource = new ClassPathResource(CLASSPATH_JSON);
             if (!resource.exists()) return Collections.emptyList();
-            try (InputStream is = resource.getInputStream()) {
-                return mapper.readValue(is, new TypeReference<List<City>>() {});
+            try (final var is = resource.getInputStream()) {
+                return mapper.readValue(is, new TypeReference<>() {
+                });
             }
         } catch (IOException e) {
             return Collections.emptyList();

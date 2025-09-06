@@ -12,15 +12,12 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,7 +35,7 @@ public class EndToEndIntegrationTest {
         @Primary
         public CitySearchService citySearchService() {
             CitySearchService mockService = mock(CitySearchService.class);
-            List<String> mockCities = Arrays.asList(
+            List<String> mockCities = List.of(
                     "New York US (40.7128,-74.006)",
                     "Newark US (40.7357,-74.1724)"
             );
@@ -89,18 +86,19 @@ public class EndToEndIntegrationTest {
                 .andExpect(model().attribute("city", "New York"));
 
         // Step 4: User requests an AI summary of the weather
-        String weatherReportJson = "{\n" +
-                "  \"latitude\": 40.7128,\n" +
-                "  \"longitude\": -74.0060,\n" +
-                "  \"timezone\": \"America/New_York\",\n" +
-                "  \"hourly\": {\n" +
-                "    \"time\": [\"2023-01-01T00:00\", \"2023-01-01T01:00\"],\n" +
-                "    \"temperature_2m\": [20.5, 21.0],\n" +
-                "    \"precipitation\": [0.0, 0.0],\n" +
-                "    \"wind_speed_10m\": [5.0, 5.5],\n" +
-                "    \"relative_humidity_2m\": [65.0, 70.0]\n" +
-                "  }\n" +
-                "}";
+        String weatherReportJson = """
+                {
+                  "latitude": 40.7128,
+                  "longitude": -74.0060,
+                  "timezone": "America/New_York",
+                  "hourly": {
+                    "time": ["2023-01-01T00:00", "2023-01-01T01:00"],
+                    "temperature_2m": [20.5, 21.0],
+                    "precipitation": [0.0, 0.0],
+                    "wind_speed_10m": [5.0, 5.5],
+                    "relative_humidity_2m": [65.0, 70.0]
+                  }
+                }""";
 
         mockMvc.perform(post("/api/ai-summary")
                 .contentType(MediaType.APPLICATION_JSON)

@@ -14,11 +14,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -69,7 +69,7 @@ public class CitySearchControllerIntegrationTest {
 
     @Test
     public void searchShouldReturnCitiesForValidQuery() throws Exception {
-        List<String> mockCities = Arrays.asList(
+        List<String> mockCities = List.of(
                 "New York US (40.7128,-74.006)",
                 "Newark US (40.7357,-74.1724)"
         );

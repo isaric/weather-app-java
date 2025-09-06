@@ -16,8 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,18 +58,20 @@ public class AiSummaryControllerIntegrationTest {
     @Test
     public void summarizeShouldReturnAiSummary() throws Exception {
         // Create a sample WeatherReport
-        WeatherReport report = new WeatherReport();
-        report.setLatitude(40.7128);
-        report.setLongitude(-74.0060);
-        report.setTimezone("America/New_York");
+        WeatherReport.Hourly hourly = new WeatherReport.Hourly(
+                List.of("2023-01-01T00:00", "2023-01-01T01:00"),
+                List.of(20.5, 21.0),
+                List.of(0.0, 0.0),
+                List.of(5.0, 5.5),
+                List.of(65.0, 70.0)
+        );
 
-        WeatherReport.Hourly hourly = new WeatherReport.Hourly();
-        hourly.setTime(Arrays.asList("2023-01-01T00:00", "2023-01-01T01:00"));
-        hourly.setTemperature2m(Arrays.asList(20.5, 21.0));
-        hourly.setPrecipitation(Arrays.asList(0.0, 0.0));
-        hourly.setWindSpeed10m(Arrays.asList(5.0, 5.5));
-        hourly.setRelativeHumidity2m(Arrays.asList(65.0, 70.0));
-        report.setHourly(hourly);
+        WeatherReport report = new WeatherReport(
+                40.7128,
+                -74.0060,
+                "America/New_York",
+                hourly
+        );
 
         String expectedSummary = "Expect mild temperatures around 20-21°C with no precipitation.";
         when(aiSummaryService.summarize(any(WeatherReport.class), anyString(), anyString()))
@@ -86,10 +87,5 @@ public class AiSummaryControllerIntegrationTest {
                 .andExpect(jsonPath("$.model", is("gemini")))
                 .andExpect(jsonPath("$.configured", is(true)));
     }
-
-    // This test is skipped for now due to issues with exception handling in the integration test
-    // @Test
-    // public void summarizeShouldHandleExceptions() throws Exception {
-    //     // Test implementation
-    // }
+    
 }

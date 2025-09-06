@@ -51,10 +51,10 @@ public class ReportControllerIntegrationTest {
 
     @ParameterizedTest
     @CsvSource({
-            "-91.0, 0.0",    // Latitude below -90
-            "91.0, 0.0",     // Latitude above 90
-            "0.0, -181.0",   // Longitude below -180
-            "0.0, 181.0"     // Longitude above 180
+            "-91.0, 0.0",
+            "91.0, 0.0",
+            "0.0, -181.0",
+            "0.0, 181.0"
     })
     public void reportShouldReturnErrorWithInvalidCoordinates(double lat, double lon) throws Exception {
         mockMvc.perform(get("/report")

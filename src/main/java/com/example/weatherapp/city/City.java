@@ -5,37 +5,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class City {
-
-    private String name;
-    // two-letter country code expected
-    private String country;
-
-    private Double lat;
-
-    @JsonAlias({"lng", "lon"})
-    @JsonProperty("lon")
-    private Double lon;
-
-    // Optional field in some datasets (ignored for formatting)
-    private String state;
-
-    public City() {}
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getCountry() { return country; }
-    public void setCountry(String country) { this.country = country; }
-
-    public Double getLat() { return lat; }
-    public void setLat(Double lat) { this.lat = lat; }
-
-    public Double getLon() { return lon; }
-    public void setLon(Double lon) { this.lon = lon; }
-
-    public String getState() { return state; }
-    public void setState(String state) { this.state = state; }
+public record City(
+        @JsonProperty("name") String name,
+        // two-letter country code expected
+        @JsonProperty("country") String country,
+        @JsonProperty("lat") Double lat,
+        @JsonAlias({"lng", "lon"})
+        @JsonProperty("lon") Double lon,
+        // Optional field in some datasets (ignored for formatting)
+        @JsonProperty("state") String state) {
 
     public String toSuggestionString() {
         String n = name != null ? name : "";
