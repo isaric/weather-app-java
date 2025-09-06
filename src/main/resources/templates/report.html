@@ -330,12 +330,26 @@
         data.addColumn('datetime', columns[0]);
         data.addColumn('number', columns[1]);
         rows.forEach(r => data.addRow(r));
+          const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         const options = {
           title: title,
-          legend: { position: 'none' },
+            legend: {position: 'none', textStyle: {color: isDark ? '#e6e9f0' : '#172033'}},
+            backgroundColor: 'transparent',
+            colors: isDark ? ['#4f8cff'] : undefined,
+            titleTextStyle: {color: isDark ? '#e6e9f0' : '#172033', fontSize: 14},
           height: document.getElementById(elementId)?.offsetHeight || 360,
           width: document.getElementById(elementId)?.offsetWidth || undefined,
-          hAxis: { format: 'M/d HH:mm' },
+            hAxis: {
+                format: 'M/d HH:mm',
+                textStyle: {color: isDark ? '#c9d1e1' : '#51607a'},
+                gridlines: {color: isDark ? '#23304d' : '#e5eaf2'},
+                baselineColor: isDark ? '#23304d' : '#e5eaf2'
+            },
+            vAxis: {
+                textStyle: {color: isDark ? '#c9d1e1' : '#51607a'},
+                gridlines: {color: isDark ? '#23304d' : '#e5eaf2'},
+                baselineColor: isDark ? '#23304d' : '#e5eaf2'
+            },
           chartArea: { left: 60, top: 40, width: '80%', height: '70%' }
         };
         const chart = new google.visualization.LineChart(document.getElementById(elementId));
@@ -347,12 +361,26 @@
         data.addColumn('datetime', columns[0]);
         data.addColumn('number', columns[1]);
         rows.forEach(r => data.addRow(r));
+          const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         const options = {
           title: title,
-          legend: { position: 'none' },
+            legend: {position: 'none', textStyle: {color: isDark ? '#e6e9f0' : '#172033'}},
+            backgroundColor: 'transparent',
+            colors: isDark ? ['#4f8cff'] : undefined,
+            titleTextStyle: {color: isDark ? '#e6e9f0' : '#172033', fontSize: 14},
           height: document.getElementById(elementId)?.offsetHeight || 360,
           width: document.getElementById(elementId)?.offsetWidth || undefined,
-          hAxis: { format: 'M/d HH:mm' },
+            hAxis: {
+                format: 'M/d HH:mm',
+                textStyle: {color: isDark ? '#c9d1e1' : '#51607a'},
+                gridlines: {color: isDark ? '#23304d' : '#e5eaf2'},
+                baselineColor: isDark ? '#23304d' : '#e5eaf2'
+            },
+            vAxis: {
+                textStyle: {color: isDark ? '#c9d1e1' : '#51607a'},
+                gridlines: {color: isDark ? '#23304d' : '#e5eaf2'},
+                baselineColor: isDark ? '#23304d' : '#e5eaf2'
+            },
           chartArea: { left: 60, top: 40, width: '80%', height: '70%' }
         };
         const chart = new google.visualization.ColumnChart(document.getElementById(elementId));
