@@ -1,7 +1,7 @@
 package com.example.weatherapp.web;
 
 import com.example.weatherapp.ai.AiSummaryService;
-import com.example.weatherapp.weather.WeatherService.WeatherReport;
+import com.example.weatherapp.weather.WeatherReport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

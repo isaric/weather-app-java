@@ -1,6 +1,6 @@
 package com.example.weatherapp.ai;
 
-import com.example.weatherapp.weather.WeatherService.WeatherReport;
+import com.example.weatherapp.weather.WeatherReport;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.model.chat.ChatLanguageModel;
