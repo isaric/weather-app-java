@@ -2,6 +2,8 @@ name: Build and Push Docker Image (Multi-Arch)
 
 on:
   push:
+    paths-ignore:
+      - '**/*.md'
     branches:
       - main
   workflow_dispatch:
