@@ -53,9 +53,20 @@ A web application for providing a weather report along with an AI summary with a
 
 ### Running the Application
 
-Using Gradle wrapper:
+#### Option 1: Using Gradle wrapper
 ```bash
 ./gradlew bootRun
+```
+
+#### Option 2: Using Docker
+1. Build the Docker image:
+```bash
+docker build -t weather-app-java .
+```
+
+2. Run the container:
+```bash
+docker run -p 8080:8080 -e AI_API_KEY=your_gemini_api_key weather-app-java
 ```
 
 The application will be available at http://localhost:8080
